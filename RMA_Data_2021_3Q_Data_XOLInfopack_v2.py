@@ -8,7 +8,6 @@ filenames = ['202109 Korean Re Inforce File - PFS_KOR_1',
             '202109 Korean Re Inforce File - PFS_KRC',
             '202109 Korean Re Inforce File - PFS_KRS, PFS_KRP',
              '202109 Korean Re Inforce File - PRU, NYL, PFSC, Lincoln, Principal']
-# filenames = ['202109 Korean Re Inforce File - PFS_KOR_1']
 dfs = []
 
 # csv 자료 읽어오기
@@ -17,7 +16,10 @@ dfs = []
 for fname in filenames:
     print('Loading {}'.format(fname))
     df = pd.read_csv('C:\\Users\\sdpark\\Desktop\\업무\\1_출재특약\\1_CAT XOL\\2022\\1_RawData\\RMA\\2021 3Q\\{}.csv'.format(fname), low_memory = False)
-    condition = df[df['Coverage_CededNetAmountRisk'] > 500000]
+    # condition = df[df['Coverage_CededNetAmountRisk'] > 500000]
+    # df = condition[['Policy_PolicyNumber','CedingCompany','Coverage_CededNetAmountRisk']]
+    # KIMMEL 사망건(계약번호: 0056733505) 제외
+    condition = df[df['Policy_PolicyNumber'] != "0056733505"]
     df = condition[['Policy_PolicyNumber','CedingCompany','Coverage_CededNetAmountRisk']]
     dfs.append(df)
 
@@ -25,9 +27,9 @@ print('Data loading is completed!')
 
 df_merged = pd.concat(dfs)
 
-# Group by로 동일 증번의 가입금액 합산해줌
-grouped = df_merged.groupby('Policy_PolicyNumber')
-df_merged = grouped.sum()
+# Group by로 동일 증번의 가입금액 합산해줌 (Risk XOL과 기준을 맞추기 위해선 해당 코드 필요)
+# grouped = df_merged.groupby('Policy_PolicyNumber')
+# df_merged = grouped.sum()
 
 # 결과 함수 정의
 def RiskProfile(lower, upper):
@@ -58,7 +60,7 @@ column_name = ['Min NAR', 'Max NAR', 'No. of insureds', 'NAR']
 # Data frame 설정
 df = pd.DataFrame (results, columns = [column_name])
 df
-excelfilename = 'Risk Profile as at 202109_v5_F.xlsx'
+excelfilename = 'Risk Profile as at 202109_F.xlsx'
 
 # 엑셀에 작성
 writer = pd.ExcelWriter(excelfilename, 
